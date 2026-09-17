@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy for Bachat | Checkout</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .checkout-box { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .payment-options { margin: 20px 0; padding: 15px; border: 1px solid #eee; background: #fafafa; }
+        #upi-section { display: none; margin-top: 15px; text-align: center; }
+        #upi-section img { max-width: 200px; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
+        button { background: #2c3e50; color: white; width: 100%; padding: 12px; border: none; font-size: 16px; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #1a252f; }
+    </style>
+</head>
+<body>
+
+<div class="checkout-box">
+    <h2>Complete Your Order</h2>
+    <p>Book: <strong>Software Engineering Principles</strong> - ₹350</p>
+    
+    <form id="checkout-form">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="customerName" value="Nikhil Sharma" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Delivery Address</label>
+            <input type="text" id="address" value="Acheja, Greater Noida, UP" required>
+        </div>
+
+        <div class="payment-options">
+            <label>Select Payment Method:</label>
+            <input type="radio" name="payment" value="COD" id="cod" checked onchange="toggleUPI()"> <label for="cod" style="display:inline; font-weight:normal;">Cash on Delivery</label><br><br>
+            <input type="radio" name="payment" value="UPI" id="upi" onchange="toggleUPI()"> <label for="upi" style="display:inline; font-weight:normal;">Pay via UPI (QR Code)</label>
+            
+            <div id="upi-section">
+                <p>Scan to pay <strong>₹350</strong></p>
+                <!-- Put your actual QR code image link here -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="UPI QR Code">
+                <div class="form-group">
+                    <label>Enter 12-Digit Transaction ID</label>
+                    <input type="text" id="upiTransactionId" placeholder="e.g. 312345678901">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Place Order</button>
+    </form>
+</div>
+
+<script>
+    // Show/Hide QR Code based on selection
+    function toggleUPI() {
+        const isUPI = document.getElementById('upi').checked;
+        document.getElementById('upi-section').style.display = isUPI ? 'block' : 'none';
+        document.getElementById('upiTransactionId').required = isUPI;
+    }
+
+    // Handle Form Submission
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        const data = {
+            customerName: document.getElementById('customerName').value,
+            address: document.getElementById('address').value,
+            bookTitle: "Software Engineering Principles",
+            amount: 350,
+            paymentMethod: paymentMethod,
+            upiTransactionId: document.getElementById('upiTransactionId').value
+        };
+
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        
+        if(response.ok) {
+            alert("Success! " + result.message);
+            window.location.reload(); // Refresh page after success
+        } else {
+            alert("Error: " + result.error);
+        }
+    });
+</script>
+
+</body>
+</html>
+
